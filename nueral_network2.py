@@ -1,7 +1,11 @@
 from doctest import FAIL_FAST
+from re import L
 import time
+from tkinter.constants import CENTER
 import pygame
 import random
+
+from pygame.constants import WINDOWICCPROFCHANGED
 
 
 pygame.init()
@@ -9,8 +13,8 @@ WIDTH = 640
 HEIGHT = 480
 FONT_SIZE_36 = pygame.font.SysFont('Arial', 36)
 FONT_SIZE_15 = pygame.font.SysFont('Arial', 15)
-AMOUNT_ENEMY = 50
-COIN_AMOUNT = 2
+AMOUNT_ENEMY = 1
+COIN_AMOUNT = 1
 PLAYER_AMOUNT = 1
 
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
@@ -25,6 +29,47 @@ BLUE = (0, 0, 255)
 PURPLE = (153, 0, 255) 
 WHITE = (255,255,255)
 BLACK = (0,0,0)
+
+INPUT_NEURONS = 4
+OUTPUT_NEURONS = 2
+AMOUNT_LAYERS = 1 #not accounting for output layer
+
+# nueral_network weights representation:
+# [[LAYER[NODE[VALUES]]]]
+#
+# For now we use [node[values]]
+#
+class nueral_network():
+    def __init__(self) -> None:
+        self.weights = []
+        self.biases = []
+    def set_weights(self):
+        for x in range(INPUT_NEURONS):
+            append_value = []
+            for y in range(OUTPUT_NEURONS):
+                append_value.append(random.choice([-0.2,-0.1,0,0.1,0.2]))
+            self.weights.append(append_value)                
+
+    #biases set representatoin: [[LAYER[NODE]]]
+    #for now we use [NODE]
+    def set_biases(self):
+        for x in range(OUTPUT_NEURONS):
+            self.biases.append(0)
+
+    def give_output(self,inputs,weights,bias):
+        output = 0
+        for x in range(len(inputs)):
+            output += inputs[x]*weights[x]
+        output += bias
+        return output
+
+    def calculate_nueral_network(self, inputs):
+        """One linear layer: each output neuron j uses weights[:, j] and biases[j]."""
+        output = []
+        for j in range(OUTPUT_NEURONS):
+            weights_for_neuron = [self.weights[i][j] for i in range(INPUT_NEURONS)]
+            output.append(self.give_output(inputs, weights_for_neuron, self.biases[j]))
+        return output
 
 class Enemy():
     def __init__(self,enemy_pos,direction) -> None:
@@ -85,6 +130,8 @@ def get_enemy_pos_at_setup(player_list,half,all_size):
 
 
 def setup():
+    nueral_network.set_weights()
+    nueral_network.set_biases()
     enemy_list = []
     coin_list = []
     all_size = 10
@@ -228,7 +275,7 @@ def play():
         pygame.display.flip()
         clock.tick(60)
 
-        
+
     while running_after_death:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
